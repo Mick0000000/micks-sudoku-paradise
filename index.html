@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mick's Sudoku Paradise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ── Loading Overlay ───────────────────────────────────── -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-content">
+      <div class="pencil-stage">
+        <div class="pencil-track">
+          <div class="pencil-car">
+            <svg class="pencil-svg" viewBox="0 0 56 20" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="4" width="38" height="12" rx="3"/>
+              <rect x="36" y="4" width="5" height="12" class="pencil-band"/>
+              <polygon points="40,4 40,16 52,10" class="pencil-tip"/>
+              <circle cx="52.5" cy="10" r="2" class="pencil-nib"/>
+              <rect x="2" y="4" width="6" height="12" rx="3" class="pencil-eraser"/>
+            </svg>
+          </div>
+        </div>
+        <div class="pencil-line-wrap">
+          <div class="pencil-line"></div>
+        </div>
+      </div>
+      <p class="loading-label">Generating puzzle…</p>
+    </div>
+  </div>
+
+  <!-- ── Toast Container ───────────────────────────────────── -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- ── Pause Overlay ─────────────────────────────────────── -->
+  <div id="pause-overlay" class="pause-overlay hidden">
+    <p class="pause-text">PAUSED</p>
+    <button class="btn btn-primary" id="resume-btn">Resume</button>
+  </div>
+
+  <!-- ── Modal: New Game Confirm ───────────────────────────── -->
+  <div id="modal-newgame" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <p class="modal-message">Start a new game? Your current progress will be lost.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="newgame-cancel-btn">Cancel</button>
+        <button class="btn btn-primary" id="newgame-confirm-btn">New Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Win ────────────────────────────────────────── -->
+  <div id="modal-win" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2 class="modal-title">Puzzle Complete!</h2>
+      <div class="win-stats">
+        <div class="win-stat">
+          <span class="win-stat-label">Difficulty</span>
+          <span class="win-stat-value" id="win-difficulty">—</span>
+        </div>
+        <div class="win-stat">
+          <span class="win-stat-label">Mistakes</span>
+          <span class="win-stat-value" id="win-mistakes">—</span>
+        </div>
+        <div class="win-stat">
+          <span class="win-stat-label">Hints Used</span>
+          <span class="win-stat-value" id="win-hints">—</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="win-newgame-btn">Play Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Game Over ──────────────────────────────────── -->
+  <div id="modal-gameover" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2 class="modal-title">Game Over</h2>
+      <p class="modal-message">You've reached the mistake limit.</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="gameover-reveal-btn">Reveal Solution</button>
+        <button class="btn btn-primary" id="gameover-newgame-btn">New Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Hint Explanation ─────────────────────────────── -->
+  <div id="modal-hint" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2 class="modal-title">How to Solve This</h2>
+      <div class="hint-technique-badge" id="hint-technique-badge">Naked Single</div>
+      <p class="modal-message" id="hint-explanation-text"></p>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="hint-close-btn">Got It!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Settings ───────────────────────────────────── -->
+  <div id="modal-settings" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2 class="modal-title">Settings</h2>
+      <div class="settings-list">
+
+        <div class="setting-row">
+          <span>Max Mistakes</span>
+          <div class="segmented" id="max-mistakes-selector">
+            <button data-val="0">∞</button>
+            <button data-val="1">1</button>
+            <button data-val="2">2</button>
+            <button data-val="3">3</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-highlight-related">Highlight related cells</label>
+          <label class="toggle">
+            <input type="checkbox" id="setting-highlight-related">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-highlight-same">Highlight same number</label>
+          <label class="toggle">
+            <input type="checkbox" id="setting-highlight-same">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-show-mistakes">Show mistakes in red</label>
+          <label class="toggle">
+            <input type="checkbox" id="setting-show-mistakes">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <label for="setting-auto-clear-notes">Auto-clear notes</label>
+          <label class="toggle">
+            <input type="checkbox" id="setting-auto-clear-notes">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="settings-close-btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal: Stats ──────────────────────────────────────── -->
+  <div id="modal-stats" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <h2 class="modal-title">Statistics</h2>
+      <div class="stats-grid">
+        <div class="stats-col">
+          <h3>Medium</h3>
+          <div class="stat-number" id="stat-medium-completed">0</div>
+          <div class="stat-sub">completed</div>
+        </div>
+        <div class="stats-col">
+          <h3>Hard</h3>
+          <div class="stat-number" id="stat-hard-completed">0</div>
+          <div class="stat-sub">completed</div>
+        </div>
+        <div class="stats-col">
+          <h3>Expert</h3>
+          <div class="stat-number" id="stat-expert-completed">0</div>
+          <div class="stat-sub">completed</div>
+        </div>
+        <div class="stats-col stats-col-evil">
+          <h3>Evil</h3>
+          <div class="stat-number" id="stat-evil-completed">0</div>
+          <div class="stat-sub">completed</div>
+        </div>
+      </div>
+      <div class="stat-total-row">
+        <span>Total mistakes ever</span>
+        <span class="stat-total-val" id="stat-total-mistakes">0</span>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="stats-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── App Shell ─────────────────────────────────────────── -->
+  <div class="app">
+
+    <header class="app-header">
+      <h1 class="app-title">MICK'S SUDOKU PARADISE</h1>
+      <nav class="header-nav">
+        <button class="icon-btn" id="stats-btn" title="Statistics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="settings-btn" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="theme-btn" title="Toggle theme">
+          <svg id="theme-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg id="theme-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </button>
+        <button class="icon-btn" id="pause-btn" title="Pause">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16"/>
+            <rect x="14" y="4" width="4" height="16"/>
+          </svg>
+        </button>
+      </nav>
+    </header>
+
+    <main class="app-main">
+
+      <div class="game-topbar">
+        <div class="difficulty-selector">
+          <span id="diff-pill"></span>
+          <button class="diff-btn active" data-diff="medium">Medium</button>
+          <button class="diff-btn" data-diff="hard">Hard</button>
+          <button class="diff-btn" data-diff="expert">Expert</button>
+          <button class="diff-btn diff-btn-evil" data-diff="evil">Evil</button>
+        </div>
+        <div class="mistakes-area">
+          <span class="mistakes-label">Mistakes</span>
+          <div id="mistakes-dots" class="mistakes-dots"></div>
+        </div>
+        <button class="btn btn-outline" id="new-game-btn">New Game</button>
+      </div>
+
+      <div class="grid-wrapper">
+        <div id="sudoku-grid" class="sudoku-grid"></div>
+      </div>
+
+      <div class="controls-area">
+        <div class="action-row">
+          <button class="action-btn" id="undo-btn" title="Undo (Z)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 14 4 9l5-5"/>
+              <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>
+            </svg>
+            <span>Undo</span>
+          </button>
+          <button class="action-btn" id="redo-btn" title="Redo (Y)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m15 14 5-5-5-5"/>
+              <path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/>
+            </svg>
+            <span>Redo</span>
+          </button>
+          <button class="action-btn" id="erase-btn" title="Erase (Delete)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 20H7L3 16l10-10 7 7-2.5 2.5"/>
+              <path d="M6 10 14 18"/>
+            </svg>
+            <span>Erase</span>
+          </button>
+          <button class="action-btn" id="notes-btn" title="Notes (N)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+            </svg>
+            <span>Notes</span>
+          </button>
+          <button class="action-btn" id="hint-btn" title="Hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4"/>
+              <path d="M12 16h.01"/>
+            </svg>
+            <span>Hint (<span id="hint-count">3</span>)</span>
+          </button>
+        </div>
+        <div id="number-pad" class="number-pad"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="bg.js"></script>
+</body>
+</html>

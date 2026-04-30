@@ -1,0 +1,9 @@
+{
+  "name": "micks-sudoku-paradise",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve . -p 3000 --no-clipboard",
+    "start": "npx serve . -p 3000 --no-clipboard"
+  }
+}

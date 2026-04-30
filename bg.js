@@ -10,98 +10,153 @@
   resize();
   window.addEventListener('resize', resize);
 
+  function isEvil() {
+    return document.documentElement.dataset.evil === 'true';
+  }
+
   // ── Base gradient layer ───────────────────────────────────────────
-  // A slowly rotating conic gradient plus four floating radial blobs
-  // that orbit the centre at different speeds, creating the oscillation.
 
   function drawBase(t) {
     const cx  = canvas.width  / 2;
     const cy  = canvas.height / 2;
     const dim = Math.max(canvas.width, canvas.height);
+    const evil = isEvil();
 
-    // Conic sweeps one full rotation every ~10 minutes
     const rot = t * 0.0000105;
     const conic = ctx.createConicGradient(rot, cx, cy);
-    conic.addColorStop(0.00, '#0b3320'); // deep forest
-    conic.addColorStop(0.10, '#1a6640'); // rich green
-    conic.addColorStop(0.22, '#c8980e'); // deep gold
-    conic.addColorStop(0.32, '#f0d050'); // bright yellow-gold
-    conic.addColorStop(0.44, '#1db870'); // vivid emerald
-    conic.addColorStop(0.54, '#2a7ec8'); // blue highlight
-    conic.addColorStop(0.63, '#0f4d2c'); // dark green
-    conic.addColorStop(0.74, '#78cc50'); // lime green
-    conic.addColorStop(0.85, '#d4a018'); // warm gold
-    conic.addColorStop(0.94, '#1a5c3a'); // medium green
-    conic.addColorStop(1.00, '#0b3320'); // back to deep forest
+
+    if (evil) {
+      conic.addColorStop(0.00, '#1a0505');
+      conic.addColorStop(0.10, '#5c1010');
+      conic.addColorStop(0.22, '#b03a08');
+      conic.addColorStop(0.32, '#e06520');
+      conic.addColorStop(0.44, '#8b1c1c');
+      conic.addColorStop(0.54, '#2a0808');
+      conic.addColorStop(0.63, '#7a1e05');
+      conic.addColorStop(0.74, '#c84000');
+      conic.addColorStop(0.85, '#7a1515');
+      conic.addColorStop(0.94, '#3d0f0f');
+      conic.addColorStop(1.00, '#1a0505');
+    } else {
+      conic.addColorStop(0.00, '#0b3320');
+      conic.addColorStop(0.10, '#1a6640');
+      conic.addColorStop(0.22, '#c8980e');
+      conic.addColorStop(0.32, '#f0d050');
+      conic.addColorStop(0.44, '#1db870');
+      conic.addColorStop(0.54, '#2a7ec8');
+      conic.addColorStop(0.63, '#0f4d2c');
+      conic.addColorStop(0.74, '#78cc50');
+      conic.addColorStop(0.85, '#d4a018');
+      conic.addColorStop(0.94, '#1a5c3a');
+      conic.addColorStop(1.00, '#0b3320');
+    }
     ctx.fillStyle = conic;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Blob time — slower cycle (~55 s) so movement is gentle
     const b = t * 0.000114;
 
-    // Gold blob
-    const g1x = cx + Math.cos(b * 0.71)        * canvas.width  * 0.34;
-    const g1y = cy + Math.sin(b * 0.53 + 1.1)  * canvas.height * 0.30;
-    const r1  = ctx.createRadialGradient(g1x, g1y, 0, g1x, g1y, dim * 0.58);
-    r1.addColorStop(0, 'rgba(230, 190, 35, 0.58)');
-    r1.addColorStop(1, 'rgba(230, 190, 35, 0)');
-    ctx.fillStyle = r1;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (evil) {
+      // Ember-orange blob
+      const g1x = cx + Math.cos(b * 0.71)       * canvas.width  * 0.34;
+      const g1y = cy + Math.sin(b * 0.53 + 1.1) * canvas.height * 0.30;
+      const r1  = ctx.createRadialGradient(g1x, g1y, 0, g1x, g1y, dim * 0.58);
+      r1.addColorStop(0, 'rgba(210, 80, 20, 0.62)');
+      r1.addColorStop(1, 'rgba(210, 80, 20, 0)');
+      ctx.fillStyle = r1;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Light green blob
-    const g2x = cx + Math.cos(b * 0.43 + 2.0)  * canvas.width  * 0.40;
-    const g2y = cy + Math.sin(b * 0.62 + 0.7)  * canvas.height * 0.32;
-    const r2  = ctx.createRadialGradient(g2x, g2y, 0, g2x, g2y, dim * 0.52);
-    r2.addColorStop(0, 'rgba(90, 220, 145, 0.48)');
-    r2.addColorStop(1, 'rgba(90, 220, 145, 0)');
-    ctx.fillStyle = r2;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Deep crimson blob
+      const g2x = cx + Math.cos(b * 0.43 + 2.0)  * canvas.width  * 0.40;
+      const g2y = cy + Math.sin(b * 0.62 + 0.7)  * canvas.height * 0.32;
+      const r2  = ctx.createRadialGradient(g2x, g2y, 0, g2x, g2y, dim * 0.52);
+      r2.addColorStop(0, 'rgba(155, 25, 18, 0.60)');
+      r2.addColorStop(1, 'rgba(155, 25, 18, 0)');
+      ctx.fillStyle = r2;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Blue highlight blob
-    const g3x = cx + Math.cos(b * 0.31 + 3.9)  * canvas.width  * 0.30;
-    const g3y = cy + Math.sin(b * 0.47 + 2.4)  * canvas.height * 0.36;
-    const r3  = ctx.createRadialGradient(g3x, g3y, 0, g3x, g3y, dim * 0.42);
-    r3.addColorStop(0, 'rgba(55, 148, 215, 0.42)');
-    r3.addColorStop(1, 'rgba(55, 148, 215, 0)');
-    ctx.fillStyle = r3;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Charcoal shadow blob
+      const g3x = cx + Math.cos(b * 0.31 + 3.9)  * canvas.width  * 0.30;
+      const g3y = cy + Math.sin(b * 0.47 + 2.4)  * canvas.height * 0.36;
+      const r3  = ctx.createRadialGradient(g3x, g3y, 0, g3x, g3y, dim * 0.48);
+      r3.addColorStop(0, 'rgba(20, 6, 6, 0.68)');
+      r3.addColorStop(1, 'rgba(20, 6, 6, 0)');
+      ctx.fillStyle = r3;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Deep shadow blob — keeps the darks from washing out
-    const g4x = cx + Math.cos(b * 0.19 + 5.4)  * canvas.width  * 0.24;
-    const g4y = cy + Math.sin(b * 0.27 + 3.7)  * canvas.height * 0.22;
-    const r4  = ctx.createRadialGradient(g4x, g4y, 0, g4x, g4y, dim * 0.62);
-    r4.addColorStop(0, 'rgba(8, 42, 24, 0.52)');
-    r4.addColorStop(1, 'rgba(8, 42, 24, 0)');
-    ctx.fillStyle = r4;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Amber highlight blob
+      const g4x = cx + Math.cos(b * 0.19 + 5.4)  * canvas.width  * 0.24;
+      const g4y = cy + Math.sin(b * 0.27 + 3.7)  * canvas.height * 0.22;
+      const r4  = ctx.createRadialGradient(g4x, g4y, 0, g4x, g4y, dim * 0.42);
+      r4.addColorStop(0, 'rgba(195, 95, 15, 0.40)');
+      r4.addColorStop(1, 'rgba(195, 95, 15, 0)');
+      ctx.fillStyle = r4;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Gold blob
+      const g1x = cx + Math.cos(b * 0.71)        * canvas.width  * 0.34;
+      const g1y = cy + Math.sin(b * 0.53 + 1.1)  * canvas.height * 0.30;
+      const r1  = ctx.createRadialGradient(g1x, g1y, 0, g1x, g1y, dim * 0.58);
+      r1.addColorStop(0, 'rgba(230, 190, 35, 0.58)');
+      r1.addColorStop(1, 'rgba(230, 190, 35, 0)');
+      ctx.fillStyle = r1;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Light green blob
+      const g2x = cx + Math.cos(b * 0.43 + 2.0)  * canvas.width  * 0.40;
+      const g2y = cy + Math.sin(b * 0.62 + 0.7)  * canvas.height * 0.32;
+      const r2  = ctx.createRadialGradient(g2x, g2y, 0, g2x, g2y, dim * 0.52);
+      r2.addColorStop(0, 'rgba(90, 220, 145, 0.48)');
+      r2.addColorStop(1, 'rgba(90, 220, 145, 0)');
+      ctx.fillStyle = r2;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Blue highlight blob
+      const g3x = cx + Math.cos(b * 0.31 + 3.9)  * canvas.width  * 0.30;
+      const g3y = cy + Math.sin(b * 0.47 + 2.4)  * canvas.height * 0.36;
+      const r3  = ctx.createRadialGradient(g3x, g3y, 0, g3x, g3y, dim * 0.42);
+      r3.addColorStop(0, 'rgba(55, 148, 215, 0.42)');
+      r3.addColorStop(1, 'rgba(55, 148, 215, 0)');
+      ctx.fillStyle = r3;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Deep shadow blob
+      const g4x = cx + Math.cos(b * 0.19 + 5.4)  * canvas.width  * 0.24;
+      const g4y = cy + Math.sin(b * 0.27 + 3.7)  * canvas.height * 0.22;
+      const r4  = ctx.createRadialGradient(g4x, g4y, 0, g4x, g4y, dim * 0.62);
+      r4.addColorStop(0, 'rgba(8, 42, 24, 0.52)');
+      r4.addColorStop(1, 'rgba(8, 42, 24, 0)');
+      ctx.fillStyle = r4;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   }
 
-  // ── Water-droplet ripple layer ────────────────────────────────────
+  // ── Ripple layer ─────────────────────────────────────────────────
 
-  const palette = [
-    [50,  220, 140], // bright emerald
-    [25,  190, 165], // teal aqua
-    [80,  225, 180], // aquamarine
-    [115, 212,  62], // lime
-    [12,  148, 132], // deep sea
-    [60,  178, 165], // tropical teal
-    [95,  202, 108], // vivid green
-    [168, 232,  95], // sunlit lime
-    [30,  168, 148], // sea glass
-    [240, 210,  70], // gold shimmer
-    [80,  160, 230], // water blue
+  const normalPalette = [
+    [50,  220, 140], [25,  190, 165], [80,  225, 180],
+    [115, 212,  62], [12,  148, 132], [60,  178, 165],
+    [95,  202, 108], [168, 232,  95], [30,  168, 148],
+    [240, 210,  70], [80,  160, 230],
+  ];
+
+  const evilPalette = [
+    [220,  65,  20], [185,  28,  15], [245, 105,  30],
+    [200,  50,  18], [160,  22,  22], [255, 120,  40],
+    [140,  25,  25], [255,  80,  20], [120,  18,  18],
+    [230, 140,  30], [100,  18,  18],
   ];
 
   const ripples = [];
 
   function makeRipple(seedRadius, seedOpacity) {
-    const [r, g, b] = palette[Math.floor(Math.random() * palette.length)];
+    const pal = isEvil() ? evilPalette : normalPalette;
+    const [r, g, b] = pal[Math.floor(Math.random() * pal.length)];
     return {
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       r, g, b,
       radius:      seedRadius  ?? 0,
-      maxRadius:   Math.random() * 380 + 180, // 180 – 560 px
+      maxRadius:   Math.random() * 380 + 180,
       opacity:     seedOpacity ?? 0,
       peakOpacity: Math.random() * 0.26 + 0.10,
       speed:       Math.random() * 0.30 + 0.10,
@@ -109,7 +164,6 @@
     };
   }
 
-  // Pre-seed so the canvas isn't bare on first frame
   for (let i = 0; i < 9; i++) {
     ripples.push(makeRipple(Math.random() * 260, Math.random() * 0.16 + 0.05));
   }
@@ -146,7 +200,6 @@
 
       if (p.opacity <= 0) { ripples.splice(i, 1); continue; }
 
-      // Ring-shaped radial gradient: hollow dark centre → bright crest → fade
       const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
       grd.addColorStop(0,    `rgba(${p.r},${p.g},${p.b},${fmt(p.opacity * 0.18)})`);
       grd.addColorStop(0.28, `rgba(${p.r},${p.g},${p.b},${fmt(p.opacity)})`);

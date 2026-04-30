@@ -345,7 +345,7 @@ function placeDigit(digit) {
   renderNumberPad();
   updateActionButtons();
   animatePop(selected);
-  animateCorrectGlow(selected);
+  animateBloom(selected);
 
   // Burst the pad button when all 9 of this digit are placed
   if (userGrid.filter(v => v === digit).length === 9) {
@@ -409,15 +409,6 @@ function animateGridEntrance() {
       cell.style.removeProperty('--enter-delay');
     }, { once: true });
   }
-}
-
-// ─── Correct glow ────────────────────────────────────────────────
-function animateCorrectGlow(idx) {
-  const cell = gridEl.children[idx];
-  cell.classList.remove('correct-glow');
-  void cell.offsetWidth;
-  cell.classList.add('correct-glow');
-  cell.addEventListener('animationend', () => cell.classList.remove('correct-glow'), { once: true });
 }
 
 // ─── Win wave ────────────────────────────────────────────────────
@@ -680,6 +671,39 @@ function animateShake(idx) {
   void cell.offsetWidth;
   cell.classList.add('shake');
   cell.addEventListener('animationend', () => cell.classList.remove('shake'), { once: true });
+}
+
+function animateBloom(idx) {
+  const cell = gridEl.children[idx];
+  const rect = cell.getBoundingClientRect();
+  const cx   = rect.left + rect.width  / 2;
+  const cy   = rect.top  + rect.height / 2;
+  const size = rect.width;
+  const evil = document.documentElement.dataset.evil === 'true';
+
+  const rings = evil
+    ? [
+        { color: 'rgba(220,38,38,0.72)',  delay: 0,   dur: 520 },
+        { color: 'rgba(251,146,60,0.50)', delay: 85,  dur: 680 },
+        { color: 'rgba(220,38,38,0.28)',  delay: 165, dur: 840 },
+      ]
+    : [
+        { color: 'rgba(29,184,112,0.72)', delay: 0,   dur: 520 },
+        { color: 'rgba(212,160,24,0.50)', delay: 85,  dur: 680 },
+        { color: 'rgba(29,184,112,0.28)', delay: 165, dur: 840 },
+      ];
+
+  rings.forEach(({ color, delay, dur }) => {
+    const ring = document.createElement('div');
+    ring.className = 'bloom-ring';
+    ring.style.cssText =
+      `left:${cx}px;top:${cy}px;` +
+      `width:${size}px;height:${size}px;` +
+      `background:radial-gradient(circle,${color} 0%,transparent 70%);` +
+      `animation-delay:${delay}ms;animation-duration:${dur}ms;`;
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), delay + dur + 60);
+  });
 }
 
 // ─── Keyboard ─────────────────────────────────────────────────────

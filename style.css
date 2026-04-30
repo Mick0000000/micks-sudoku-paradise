@@ -939,28 +939,28 @@ body {
 /* Full red/charcoal/orange dark theme — canvas + surfaces both shift */
 
 [data-evil="true"] {
-  /* Surface goes charcoal-red */
-  --surface:       #1c0a0a;
-  --surface-2:     #2c1212;
-  /* Text becomes warm light so it's legible on dark surfaces */
-  --text:          #f5ddd8;
-  --text-muted:    #9a6a60;
-  /* Grid lines turn dark crimson */
-  --grid-thick:    #5c2020;
-  --grid-thin:     #2c1010;
-  --border-light:  #3c1818;
-  --border-dark:   #f5ddd8;
-  /* Accent shifts to crimson */
-  --accent:        #e53e3e;
-  --accent-dim:    rgba(229, 62, 62, 0.2);
+  /* Surface: rich dark crimson (not near-black) for legibility */
+  --surface:       #3d1515;
+  --surface-2:     #4e1e1e;
+  /* Text: warm cream — high contrast against dark crimson */
+  --text:          #f8e6e0;
+  --text-muted:    #c08070;
+  /* Grid lines: visible crimson */
+  --grid-thick:    #8a3030;
+  --grid-thin:     #542020;
+  --border-light:  #662828;
+  --border-dark:   #f8e6e0;
+  /* Accent: bright orange-red so user digits pop against the dark red bg */
+  --accent:        #ff7a7a;
+  --accent-dim:    rgba(255, 122, 122, 0.22);
   /* Cell highlights — semi-transparent so text stays legible */
-  --selected-bg:   rgba(220, 38, 38, 0.35);
-  --same-bg:       rgba(220, 38, 38, 0.2);
-  --peer-bg:       rgba(220, 38, 38, 0.1);
-  /* Wrong answer stays red but brighter against dark bg */
-  --wrong:         #ff6b6b;
-  --wrong-bg:      rgba(255, 107, 107, 0.18);
-  /* Pill and mistakes match the crimson theme */
+  --selected-bg:   rgba(220, 38, 38, 0.42);
+  --same-bg:       rgba(220, 38, 38, 0.25);
+  --peer-bg:       rgba(220, 38, 38, 0.14);
+  /* Wrong answer */
+  --wrong:         #ff8080;
+  --wrong-bg:      rgba(255, 128, 128, 0.18);
+  /* Pill and mistakes */
   --pill-bg:       #c53030;
   --mistake-color: #e53e3e;
   --shadow:        0 4px 28px rgba(100, 10, 10, 0.55);
@@ -971,20 +971,20 @@ body {
   background: rgba(80, 10, 10, 0.9);
 }
 
-/* Both themes use the same dark surface in evil mode */
+/* Dark theme + evil: slightly deeper but still legible */
 [data-evil="true"][data-theme="dark"] {
-  --surface:       #130707;
-  --surface-2:     #200e0e;
-  --accent:        #f87171;
-  --accent-dim:    rgba(248, 113, 113, 0.2);
-  --selected-bg:   rgba(248, 113, 113, 0.3);
-  --same-bg:       rgba(248, 113, 113, 0.17);
-  --peer-bg:       rgba(248, 113, 113, 0.08);
-  --grid-thick:    #5c2020;
-  --grid-thin:     #1e0c0c;
-  --border-light:  #2a1010;
+  --surface:       #2e1010;
+  --surface-2:     #3c1818;
+  --accent:        #ff8080;
+  --accent-dim:    rgba(255, 128, 128, 0.2);
+  --selected-bg:   rgba(248, 113, 113, 0.38);
+  --same-bg:       rgba(248, 113, 113, 0.22);
+  --peer-bg:       rgba(248, 113, 113, 0.11);
+  --grid-thick:    #7a2828;
+  --grid-thin:     #3e1818;
+  --border-light:  #4a2020;
   --text:          #f8e8e4;
-  --text-muted:    #a07570;
+  --text-muted:    #c08878;
   --pill-bg:       #c53030;
   --mistake-color: #f87171;
 }
